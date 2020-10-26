@@ -8,7 +8,13 @@
   (and (number? num) (zero? num)))
 
 (defn- negative-value? [value]
-  (and (sequential? value) (= (count value) 2) (= :- (keyword (first value)))))
+  (cond
+    (number? value)
+    (neg? value)
+    (sequential? value)
+    (and (= (count value) 2) (= :- (keyword (first value))))
+    :else
+    false))
 
 (defn- solve-sign [args val]
   (let [negative-count (filter negative-value? args)]
