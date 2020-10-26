@@ -20,6 +20,10 @@
 (t/deftest abs-evaluation
   (t/is (= (e/evaluate {} '(abs -10)) 10) "Abs should work"))
 
+(t/deftest sqrt-evaluation
+  (t/is (= (int (e/evaluate {} '(sqrt 169))) 13))
+  (t/is (< (Math/abs ^double (- (e/evaluate {} '(sqrt 10e5)) (Math/sqrt (float 10e5)))) 1e-5)))
+
 (t/deftest simple-evaluation
   (let [expression '(* 2 (+ 1 1))]
     (t/is (e/evaluate {} expression) 4)))
