@@ -16,9 +16,11 @@
        (recur guess approx)
        guess))))
 
+(defn pow [base & pows]
+  (apply * (repeat (reduce * pows) base)))
+
 (def func-map
-  {(symbol :pow)  (fn [base & pows]
-                    (apply * (repeat (reduce * pows) base)))
+  {(symbol :pow)  pow
    (symbol :abs)  abs
    (symbol :sqrt) sqrt})
 

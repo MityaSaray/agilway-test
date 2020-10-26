@@ -35,4 +35,23 @@
     (t/is (= '(- x) (o/optimize '(- 0 x))))
     (t/is (= '(- x) (o/optimize '(- (- x) 0))))))
 
+(t/deftest power-optimization
+  (t/testing "Pow optimization"
+    (t/is (= 0 (o/optimize '(pow 0 5))))
+    (t/is (= 4 (o/optimize '(pow 2 2))))
+    (t/is (= '(pow 2 y) (o/optimize '(pow 2 y))))))
 
+(t/deftest abs-optimization
+  (t/testing "Abs optimization"
+    (t/is (= 5 (o/optimize '(abs -5))))
+    (t/is (= 'y (o/optimize '(abs (- y)))))
+    (t/is (= 'y (o/optimize '(abs y))))))
+
+(t/deftest sqrt-optimization
+  (t/testing "Square root optimization"
+    (t/is (= 4 (int (o/optimize '(sqrt 16)))))
+    (t/is (= '(sqrt y) (o/optimize '(sqrt y))))))
+
+(t/deftest combined-optimizer
+  (t/testing "Testing combined optimizers"
+    (t/is (= 12 (o/optimize '(+ 2 (abs (- (/ (pow 10 (sqrt 4)) 10)))))))))

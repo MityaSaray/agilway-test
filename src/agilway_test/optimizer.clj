@@ -1,11 +1,18 @@
-(ns agilway-test.optimizer)
+(ns agilway-test.optimizer
+  (:require [agilway-test.evaluator :as ev]))
 
 (defn- significant-values [values zero-element]
   (filter (fn [value] (not= value zero-element)) values))
 
+(defn- zero-num? [num]
+  (and (number? num) (zero? num)))
+
+(defn- negative-value? [value]
+  (and (sequential? value) (= (count value) 2) (= :- (keyword (first value)))))
+
 (defn- opposite-value [value]
   (cond
-    (and (sequential? value) (= (count value) 2))
+    (negative-value? value)
     (second value)
     (number? value)
     (- value)
@@ -46,7 +53,7 @@
     1
     (= f (opposite-value s))
     -1
-    (and (number? f) (zero? f))
+    (zero-num? f)
     0
     (every? number? [f s])
     (/ f s)
@@ -59,24 +66,54 @@
     (cond
       (= f s)
       0
-      (and (number? f) (zero? f))
+      (zero-num? f)
       (opposite-value s)
-      (and (number? s) (zero? s))
+      (zero-num? s)
       f
       (every? number? [f s])
       (- f s)
       :else
       (list '- f s))))
 
+(defn- power-optimizer [[f s]]
+  (cond
+    (zero-num? f)
+    0
+    (every? number? [f s])
+    (ev/pow f s)
+    :else
+    (list 'pow f s)))
+
+(defn- sqrt-optimizer [[value]]
+  (cond
+    (zero-num? value)
+    0
+    (number? value)
+    (ev/sqrt value)
+    :else
+    (list 'sqrt value)))
+
+(defn- abs-optimizer [[value]]
+  (cond
+    (number? value)
+    (ev/abs value)
+    (negative-value? value)
+    (opposite-value value)
+    :else
+    value))
+
+(def OPTIMIZERS {:*    multiplication-optimizer
+                 :/    division-optimizer
+                 :+    addition-optimizer
+                 :-    subtraction-optimizer
+                 :pow  power-optimizer
+                 :sqrt sqrt-optimizer
+                 :abs  abs-optimizer})
+
 (defn optimize [expression]
   (if (sequential? expression)
     (let [func          (first expression)
           args          (map optimize (rest expression))
-          optimize-func (case func
-                          * multiplication-optimizer
-                          / division-optimizer
-                          + addition-optimizer
-                          - subtraction-optimizer
-                          identity)]
+          optimize-func (get OPTIMIZERS (keyword func) identity)]
       (optimize-func args))
     expression))
