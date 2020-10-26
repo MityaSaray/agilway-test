@@ -1,15 +1,29 @@
 (ns agilway-test.evaluator)
 
+(def SQRT-DELTA 1e-5)
+
+(defn abs [val]
+  (if (pos? val)
+    val
+    (- val)))
+
+(defn sqrt
+  ([number]
+   (sqrt number number))
+  ([number approx]
+   (let [guess (/ (+ number (/ approx number)) 2)]
+     (if (> (abs (- number guess)) SQRT-DELTA)
+       (recur guess approx)
+       guess))))
+
+(def func-map
+  {(symbol :pow)  (fn [base & pows]
+                    (apply * (repeat (reduce * pows) base)))
+   (symbol :abs)  abs
+   (symbol :sqrt) sqrt})
+
 (defn resolve-function [sym]
-  (cond
-    (= sym (symbol :pow))
-    (fn [base & pows]
-      (Math/pow base (reduce * pows)))
-    (= sym (symbol :abs))
-    (fn [val]
-      (Math/abs val))
-    :else
-    (resolve sym)))
+  (get func-map sym (resolve sym)))
 
 (defn evaluate [fn-args arg]
   (cond
@@ -24,5 +38,3 @@
     ((keyword arg) fn-args)
     :else
     arg))
-
-

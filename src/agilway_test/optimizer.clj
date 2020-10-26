@@ -1,72 +1,82 @@
 (ns agilway-test.optimizer)
 
-(defn variable? [val]
-  (or (symbol? val) (sequential? val)))
+(defn- significant-values [values zero-element]
+  (filter (fn [value] (not= value zero-element)) values))
 
-(defn split-variables-values [args]
-  [(filter variable? args) (filter number? args)])
+(defn- opposite-value [value]
+  (cond
+    (and (sequential? value) (= (count value) 2))
+    (second value)
+    (number? value)
+    (- value)
+    :else
+    (list '- value)))
 
-(defn multiplication-optimizer [args]
-  (let [[variables values] (split-variables-values args)
-        values-mult (reduce * values)]
+(defn- multiplication-optimizer [args]
+  (if (some #{0} args)
+    0
+    (let [significant-multipliers (significant-values args 1)]
+      (cond
+        (empty? significant-multipliers)
+        1
+        (= 1 (count significant-multipliers))
+        (first significant-multipliers)
+        (every? number? args)
+        (reduce * args)
+        :else
+        (conj significant-multipliers '*)))))
+
+(defn- addition-optimizer [[f s]]
+  (if (= (opposite-value f) s)
+    0
+    (let [significant-elements (significant-values [f s] 0)]
+      (cond
+        (empty? significant-elements)
+        0
+        (every? number? [f s])
+        (+ f s)
+        (= 1 (count significant-elements))
+        (first significant-elements)
+        :else
+        (conj significant-elements '+)))))
+
+(defn- division-optimizer [[f s]]
+  (cond
+    (= f s)
+    1
+    (= f (opposite-value s))
+    -1
+    (and (number? f) (zero? f))
+    0
+    (every? number? [f s])
+    (/ f s)
+    :else
+    (list '/ f s)))
+
+(defn- subtraction-optimizer [[f s]]
+  (if-not s
+    (opposite-value f)
     (cond
-      (zero? values-mult)
+      (= f s)
       0
-      (empty? variables)
-      values-mult
-      (= 1 values-mult)
-      variables
+      (and (number? f) (zero? f))
+      (opposite-value s)
+      (and (number? s) (zero? s))
+      f
+      (every? number? [f s])
+      (- f s)
       :else
-      (conj variables values-mult))))
-
-(defn division-optimizer [args]
-  (let [base (first args)]
-    (if (and (number? base) (zero? base))
-      0
-      (conj (multiplication-optimizer (rest args)) base))))
-
-(defn addition-optimizer [args]
-  (let [[variables values] (split-variables-values args)
-        values-sum (reduce + values)]
-    (cond
-      (empty? variables)
-      values-sum
-      (zero? values-sum)
-      (if (> (count variables) 1)
-        variables
-        (first variables))
-      :else
-      (conj variables values-sum)))
-  )
-
-(defn subtraction-optimizer [args]
-  (conj (addition-optimizer (rest args)) (first args)))
+      (list '- f s))))
 
 (defn optimize [expression]
   (if (sequential? expression)
-    (let [func           (first expression)
-          args           (map optimize (rest expression))
-          optimize-func  (case func
-                           * multiplication-optimizer
-                           / division-optimizer
-                           + addition-optimizer
-                           - subtraction-optimizer
-                           identity)
-          optimized-expr (optimize-func args)]
-      (println (optimize-func args))
-      (if (sequential? optimized-expr)
-        (conj optimized-expr func)
-        optimized-expr))
+    (let [func          (first expression)
+          args          (map optimize (rest expression))
+          optimize-func (case func
+                          * multiplication-optimizer
+                          / division-optimizer
+                          + addition-optimizer
+                          - subtraction-optimizer
+                          identity)]
+      (optimize-func args))
     expression))
-
-(optimize '(* 1 2 3 x y 4 (+ x y)))
-
-(optimize '(* x y))
-
-(optimize '(+ 1 2 3 4 (* 1 2 3) x))
-
-(optimize '(* 2 3))
-
-(optimize '(/ y 2 2 x))
-
-(optimize '(- y 3 5 1 x 123))
