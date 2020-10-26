@@ -7,7 +7,9 @@
     "Testing multiplication optimizations"
     (t/is (= 4 (o/optimize '(* 2 2))))
     (t/is (= 0 (o/optimize '(* x 0))))
-    (t/is (= 'x (o/optimize '(* 1 x))))))
+    (t/is (= 'x (o/optimize '(* 1 x))))
+    (t/is (= 1 (o/optimize '(* x (/ 1 x)))))
+    (t/is (= -1 (o/optimize '(* (- x) (/ 1 x)))))))
 
 (t/deftest addition-optimization
   (t/testing
@@ -24,7 +26,9 @@
     (t/is (= 2) (o/optimize '(/ 4 2)))
     (t/is (= 0 (o/optimize '(/ 0 (* x 5)))))
     (t/is (= 1 (o/optimize '(/ x x))))
-    (t/is (= -1 (o/optimize '(/ x (- x)))))))
+    (t/is (= -1 (o/optimize '(/ x (- x)))))
+    (t/is (= '(+ y y) (o/optimize '(/ y (/ 1 y)))))
+    (t/is (= '(- (+ y y)) (o/optimize '(/ (- y) (/ 1 y)))))))
 
 (t/deftest subtraction-optimization
   (t/testing

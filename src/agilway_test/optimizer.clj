@@ -10,6 +10,14 @@
 (defn- negative-value? [value]
   (and (sequential? value) (= (count value) 2) (= :- (keyword (first value)))))
 
+(defn- solve-sign [args val]
+  (let [negative-count (filter negative-value? args)]
+    (if (= (count negative-count) 1)
+      (if (number? val)
+        (- val)
+        (list '- val))
+      val)))
+
 (defn- opposite-value [value]
   (cond
     (negative-value? value)
@@ -18,6 +26,19 @@
     (- value)
     :else
     (list '- value)))
+
+(defn to-positive [value]
+  (if (negative-value? value)
+    (opposite-value value)
+    value))
+
+(defn- inverted-values?
+  ([[f s]]
+   (or (inverted-values? f s)
+       (inverted-values? s f)))
+  ([f s]
+   (let [[f s] (map to-positive [f s])]
+     (= (list '/ 1 f) s))))
 
 (defn- multiplication-optimizer [args]
   (if (some #{0} args)
@@ -30,6 +51,8 @@
         (first significant-multipliers)
         (every? number? args)
         (reduce * args)
+        (inverted-values? args)
+        (solve-sign args 1)
         :else
         (conj significant-multipliers '*)))))
 
@@ -57,6 +80,8 @@
     0
     (every? number? [f s])
     (/ f s)
+    (inverted-values? f s)
+    (solve-sign [f s] (addition-optimizer (map to-positive [f f])))
     :else
     (list '/ f s)))
 
