@@ -1,22 +1,13 @@
 # agilway-test
 
-A Clojure library designed to ... well, that part is up to you.
+Program is tested on java 11, clojure 1.10.
 
-## Usage
+It uses leiningen and is intended to be used from repl / run test only.
 
-FIXME
+To run test type `lein test`
 
-## License
+To run repl type `lein repl`
 
-Copyright © 2020 FIXME
+In main namespace exposed all 3 namespaces with aliases e/evaluator, o/optimizer, js/to-javascript
 
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0.
-
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+Also functions evaluate, optimize, ->javascript are available in namespace agilway-test.core

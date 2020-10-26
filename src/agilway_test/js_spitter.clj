@@ -18,13 +18,7 @@
     :sqrt (str "Math.sqrt(" (first (extract-expression-or-val args)) ")")
     :pow (str "Math.pow(" (str/join ", " (extract-expression-or-val args)) ")")
     :abs (str "Math.abs(" (first (extract-expression-or-val args)) ")")
-    (str
-      "("
-      (str/join
-        (str " " func " ")
-        (extract-expression-or-val args)
-        )
-      ")")))
+    (str "(" (str/join (str " " func " ") (extract-expression-or-val args)) ")")))
 
 (defn- expression->js [[func & args]]
   {:args       (gather-variables args)
