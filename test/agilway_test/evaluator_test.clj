@@ -29,8 +29,17 @@
     (t/is (e/evaluate {} expression) 4)))
 
 (t/deftest complex-evaluation
-  (let [expression '(abs (* -1 2 (+ 1 2) (- (/ (pow 10 3) 100) 5)))]
-    (t/is (= (e/evaluate {} expression) 30))))
+  (let [expression '(abs
+                      (*
+                        -1                                  ;; -1
+                        2                                   ;; -2
+                        (+ 1 2)                             ;; -6
+                        (-
+                          (/ (pow 10 3) 100)                ;; 10
+                          5)                                ;; -30
+                        (int (sqrt 49))                     ;; -210
+                        ))]
+    (t/is (= (e/evaluate {} expression) 210))))
 
 (t/deftest simple-argument-evaluation
   (t/is (= (e/evaluate {:x 10} 'x)) 10))
