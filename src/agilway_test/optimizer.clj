@@ -84,6 +84,8 @@
     -1
     (zero-num? f)
     0
+    (cond (and (number? s) (= 1 s)))
+    f
     (every? number? [f s])
     (/ f s)
     (inverted-values? f s)
