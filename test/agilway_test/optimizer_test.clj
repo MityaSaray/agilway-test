@@ -27,8 +27,8 @@
     (t/is (= 0 (o/optimize '(/ 0 (* x 5)))))
     (t/is (= 1 (o/optimize '(/ x x))))
     (t/is (= -1 (o/optimize '(/ x (- x)))))
-    (t/is (= '(+ y y) (o/optimize '(/ y (/ 1 y)))))
-    (t/is (= '(- (+ y y)) (o/optimize '(/ (- y) (/ 1 y)))))))
+    (t/is (= '(* y y) (o/optimize '(/ y (/ 1 y)))))
+    (t/is (= '(- (* y y)) (o/optimize '(/ (- y) (/ 1 y)))))))
 
 (t/deftest subtraction-optimization
   (t/testing

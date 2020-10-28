@@ -87,7 +87,7 @@
     (every? number? [f s])
     (/ f s)
     (inverted-values? f s)
-    (solve-sign [f s] (addition-optimizer (map to-positive [f f])))
+    (solve-sign [f s] (multiplication-optimizer (map to-positive [f f])))
     :else
     (list '/ f s)))
 
