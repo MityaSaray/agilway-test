@@ -37,6 +37,6 @@
           (evaluate fn-args a))
         (rest arg)))
     (symbol? arg)
-    ((keyword arg) fn-args)
+    (get fn-args (keyword arg))
     :else
     arg))

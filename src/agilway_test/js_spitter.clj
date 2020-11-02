@@ -40,5 +40,3 @@
        " { return "
        (:expression parsed)
        "; }"))))
-
-(->javascript "hello" '(+ x (+ y (+ x z))))

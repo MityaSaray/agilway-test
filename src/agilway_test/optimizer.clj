@@ -2,12 +2,12 @@
   (:require [agilway-test.evaluator :as ev]))
 
 (defn- significant-values [values zero-element]
-  (filter (fn [value] (not= value zero-element)) values))
+  (filter #(not= % zero-element) values))
 
-(defn- zero-num? [num]
+(defn- ^boolean zero-num? [num]
   (and (number? num) (zero? num)))
 
-(defn- negative-value? [value]
+(defn- ^boolean negative-value? [value]
   (cond
     (number? value)
     (neg? value)
@@ -18,7 +18,7 @@
 
 (defn- solve-sign [args val]
   (let [negative-count (filter negative-value? args)]
-    (if (= (count negative-count) 1)
+    (if (odd? (count negative-count))
       (if (number? val)
         (- val)
         (list '- val))
@@ -26,10 +26,10 @@
 
 (defn- opposite-value [value]
   (cond
-    (negative-value? value)
-    (second value)
     (number? value)
     (- value)
+    (negative-value? value)
+    (second value)
     :else
     (list '- value)))
 
@@ -47,7 +47,7 @@
      (= (list '/ 1 f) s))))
 
 (defn- multiplication-optimizer [args]
-  (if (some #{0} args)
+  (if (some zero-num? args)
     0
     (let [significant-multipliers (significant-values args 1)]
       (cond
